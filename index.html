@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A patient-friendly GLP-1 and GIP/GLP-1 medication education quiz with a completion certificate." />
+  <title>GLP-1 Medication Learning Check</title>
+  <style>
+    :root {
+      --green-900: #174f3a;
+      --green-800: #216348;
+      --green-700: #2c7a58;
+      --green-500: #58a77d;
+      --green-200: #cfe9db;
+      --green-100: #eaf7f0;
+      --green-050: #f5fbf7;
+      --white: #ffffff;
+      --text: #1f2d27;
+      --muted: #5e6f67;
+      --border: #d7e6dd;
+      --danger: #a33434;
+      --danger-bg: #fff2f2;
+      --warning: #775b0b;
+      --warning-bg: #fff9e8;
+      --shadow: 0 14px 38px rgba(24, 79, 58, 0.10);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(88, 167, 125, 0.14), transparent 32rem),
+        linear-gradient(180deg, var(--green-050), #ffffff 55%);
+      line-height: 1.55;
+    }
+
+    button, input { font: inherit; }
+
+    .page-shell {
+      width: min(920px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 34px 0 56px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      color: var(--green-900);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      color: white;
+      background: linear-gradient(135deg, var(--green-700), var(--green-500));
+      box-shadow: 0 8px 20px rgba(44, 122, 88, 0.25);
+      font-size: 22px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: clamp(22px, 5vw, 42px);
+    }
+
+    h1, h2, h3 {
+      color: var(--green-900);
+      line-height: 1.18;
+      letter-spacing: -0.025em;
+    }
+
+    h1 {
+      margin: 0 0 14px;
+      font-size: clamp(2rem, 5vw, 3.3rem);
+      max-width: 760px;
+    }
+
+    h2 { margin-top: 0; }
+    p { margin: 0 0 16px; }
+
+    .lead {
+      color: var(--muted);
+      font-size: 1.08rem;
+      max-width: 730px;
+    }
+
+    .notice {
+      margin: 24px 0;
+      padding: 16px 18px;
+      border-radius: 14px;
+      border: 1px solid var(--green-200);
+      background: var(--green-100);
+    }
+
+    .notice.warning {
+      border-color: #eadb9c;
+      background: var(--warning-bg);
+      color: #5f4b10;
+    }
+
+    .check-list {
+      padding-left: 22px;
+      margin: 18px 0 26px;
+    }
+
+    .check-list li { margin-bottom: 8px; }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 13px 19px;
+      cursor: pointer;
+      font-weight: 750;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+    .btn:focus-visible, .option:focus-visible, input:focus-visible {
+      outline: 3px solid rgba(44, 122, 88, 0.28);
+      outline-offset: 3px;
+    }
+
+    .btn-primary {
+      color: white;
+      background: var(--green-700);
+      box-shadow: 0 8px 18px rgba(44, 122, 88, 0.22);
+    }
+
+    .btn-primary:hover { background: var(--green-800); }
+
+    .btn-secondary {
+      color: var(--green-900);
+      background: var(--green-100);
+      border: 1px solid var(--green-200);
+    }
+
+    .btn-plain {
+      color: var(--green-800);
+      background: white;
+      border: 1px solid var(--border);
+    }
+
+    .hidden { display: none !important; }
+
+    .progress-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .progress-track {
+      height: 10px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e8f0eb;
+      margin-bottom: 30px;
+    }
+
+    .progress-fill {
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, var(--green-500), var(--green-700));
+      transition: width 0.25s ease;
+    }
+
+    .question-number {
+      display: inline-block;
+      color: var(--green-800);
+      background: var(--green-100);
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 0.86rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .question-text {
+      font-size: clamp(1.35rem, 3vw, 1.85rem);
+      margin-bottom: 22px;
+    }
+
+    .options {
+      display: grid;
+      gap: 12px;
+    }
+
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 16px 17px;
+      border-radius: 14px;
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      background: white;
+      cursor: pointer;
+      font-weight: 650;
+      transition: border 0.15s ease, background 0.15s ease, transform 0.15s ease;
+    }
+
+    .option:hover {
+      border-color: var(--green-500);
+      background: var(--green-050);
+      transform: translateY(-1px);
+    }
+
+    .option.selected {
+      border-color: var(--green-700);
+      background: var(--green-100);
+      box-shadow: inset 0 0 0 1px var(--green-700);
+    }
+
+    .feedback {
+      margin-top: 22px;
+      padding: 17px 18px;
+      border-radius: 14px;
+      border: 1px solid var(--green-200);
+      background: var(--green-100);
+    }
+
+    .feedback.incorrect {
+      border-color: #efc5c5;
+      background: var(--danger-bg);
+    }
+
+    .feedback strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .quiz-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 26px;
+    }
+
+    .result-score {
+      display: grid;
+      place-items: center;
+      width: 150px;
+      height: 150px;
+      margin: 4px auto 22px;
+      border-radius: 50%;
+      color: white;
+      background: linear-gradient(135deg, var(--green-500), var(--green-800));
+      box-shadow: 0 18px 38px rgba(44, 122, 88, 0.24);
+      font-size: 2rem;
+      font-weight: 850;
+    }
+
+    .center { text-align: center; }
+
+    .name-field {
+      max-width: 520px;
+      margin: 24px auto 0;
+      text-align: left;
+    }
+
+    .name-field label {
+      display: block;
+      font-weight: 750;
+      margin-bottom: 7px;
+    }
+
+    .name-field input {
+      width: 100%;
+      padding: 14px 15px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      background: white;
+    }
+
+    .certificate {
+      position: relative;
+      overflow: hidden;
+      background: white;
+      border: 10px solid var(--green-100);
+      outline: 2px solid var(--green-700);
+      border-radius: 3px;
+      padding: 52px 42px;
+      text-align: center;
+      min-height: 610px;
+    }
+
+    .certificate::before,
+    .certificate::after {
+      content: "";
+      position: absolute;
+      width: 210px;
+      height: 210px;
+      border-radius: 50%;
+      background: rgba(88, 167, 125, 0.09);
+    }
+
+    .certificate::before { top: -120px; left: -90px; }
+    .certificate::after { bottom: -130px; right: -70px; }
+
+    .certificate-kicker {
+      color: var(--green-700);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-weight: 850;
+      font-size: 0.82rem;
+    }
+
+    .certificate h2 {
+      margin: 20px 0 8px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.1rem, 6vw, 3.6rem);
+    }
+
+    .certificate-name {
+      display: inline-block;
+      min-width: min(430px, 90%);
+      margin: 26px 0 10px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--green-700);
+      color: var(--green-900);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.7rem, 5vw, 2.7rem);
+      font-weight: 700;
+    }
+
+    .certificate-text {
+      max-width: 650px;
+      margin: 0 auto;
+      font-size: 1.08rem;
+    }
+
+    .certificate-seal {
+      display: grid;
+      place-items: center;
+      width: 95px;
+      height: 95px;
+      margin: 28px auto 12px;
+      border-radius: 50%;
+      border: 4px double var(--green-700);
+      color: var(--green-900);
+      background: var(--green-100);
+      font-size: 2rem;
+    }
+
+    .certificate-meta {
+      margin-top: 24px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .footer {
+      margin-top: 22px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.88rem;
+    }
+
+    details {
+      margin-top: 24px;
+      border-top: 1px solid var(--border);
+      padding-top: 18px;
+    }
+
+    summary {
+      color: var(--green-800);
+      cursor: pointer;
+      font-weight: 750;
+    }
+
+    .source-list {
+      font-size: 0.9rem;
+      color: var(--muted);
+      padding-left: 20px;
+    }
+
+    @media (max-width: 620px) {
+      .page-shell { width: min(100% - 20px, 920px); padding-top: 18px; }
+      .card { padding: 22px 18px; border-radius: 15px; }
+      .quiz-actions { flex-direction: column-reverse; }
+      .quiz-actions .btn { width: 100%; }
+      .certificate { min-height: 560px; padding: 42px 18px; }
+    }
+
+    @media print {
+      body { background: white; }
+      body * { visibility: hidden; }
+      #certificateSection, #certificateSection * { visibility: visible; }
+      #certificateSection {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        padding: 0;
+      }
+      #certificateCard {
+        box-shadow: none;
+        border: none;
+        padding: 0;
+      }
+      .certificate {
+        min-height: 96vh;
+        border: 10px solid #eaf7f0;
+        outline: 2px solid #2c7a58;
+      }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page-shell">
+    <div class="brand" aria-label="Medication Learning Center">
+      <div class="brand-mark" aria-hidden="true">✓</div>
+      <span>Medication Learning Center</span>
+    </div>
+
+    <section id="introSection" class="card">
+      <span class="question-number">Patient Education</span>
+      <h1>GLP-1 Medication Learning Check</h1>
+      <p class="lead">
+        This short quiz reviews important safety, nutrition, activity, and side-effect information for GLP-1 and GIP/GLP-1 medicines.
+      </p>
+
+      <div class="notice">
+        <strong>Before you begin:</strong> This quiz gives general education. Your own prescription label and care team's instructions always come first.
+      </div>
+
+      <ul class="check-list">
+        <li>20 multiple-choice questions</li>
+        <li>Simple explanations after each answer</li>
+        <li>A completion certificate after a score of 80% or higher</li>
+        <li>Your answers and name stay in your browser and are not sent anywhere</li>
+      </ul>
+
+      <div class="notice warning">
+        Get urgent medical help for severe or lasting belly pain, repeated vomiting, trouble breathing, swelling of the face or throat, or signs of severe dehydration.
+      </div>
+
+      <div class="actions">
+        <button id="startBtn" class="btn btn-primary">Start the quiz</button>
+      </div>
+
+      <details>
+        <summary>Clinical sources and review note</summary>
+        <ul class="source-list">
+          <li>Current U.S. FDA prescribing information and medication guides for semaglutide and tirzepatide products</li>
+          <li>American Diabetes Association Standards of Care in Diabetes</li>
+          <li>Multi-society guidance on GLP-1 medicines before surgery and procedures</li>
+          <li>This education tool should be reviewed and approved by the prescribing clinic before patient use</li>
+        </ul>
+      </details>
+    </section>
+
+    <section id="quizSection" class="card hidden" aria-live="polite">
+      <div class="progress-row">
+        <span id="progressText">Question 1 of 20</span>
+        <span id="scoreText">Score: 0</span>
+      </div>
+      <div class="progress-track" aria-hidden="true">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+
+      <span id="questionNumber" class="question-number">Question 1</span>
+      <h2 id="questionText" class="question-text"></h2>
+      <div id="options" class="options" role="group" aria-label="Answer choices"></div>
+      <div id="feedback" class="feedback hidden" aria-live="assertive"></div>
+
+      <div class="quiz-actions">
+        <button id="backBtn" class="btn btn-plain" type="button">Back</button>
+        <button id="nextBtn" class="btn btn-primary" type="button" disabled>Check answer</button>
+      </div>
+    </section>
+
+    <section id="resultSection" class="card hidden center">
+      <div id="resultScore" class="result-score">0%</div>
+      <h2 id="resultTitle">Quiz complete</h2>
+      <p id="resultMessage" class="lead" style="margin-inline:auto;"></p>
+
+      <div id="nameArea" class="name-field hidden">
+        <label for="patientName">Enter your name for the certificate</label>
+        <input id="patientName" type="text" maxlength="70" autocomplete="name" placeholder="Your full name" />
+      </div>
+
+      <div class="actions" style="justify-content:center;">
+        <button id="certificateBtn" class="btn btn-primary hidden">Create my certificate</button>
+        <button id="retryBtn" class="btn btn-secondary">Review and try again</button>
+      </div>
+    </section>
+
+    <section id="certificateSection" class="hidden">
+      <div id="certificateCard" class="card">
+        <div class="certificate" id="certificate">
+          <div class="certificate-kicker">Certificate of Completion</div>
+          <h2>GLP-1 Medication Education</h2>
+          <p>This certificate is presented to</p>
+          <div id="certificateName" class="certificate-name">Patient Name</div>
+          <p class="certificate-text">
+            for completing the GLP-1 and GIP/GLP-1 Medication Learning Check and demonstrating understanding of key medication safety and self-care information.
+          </p>
+          <div class="certificate-seal" aria-hidden="true">✓</div>
+          <p><strong>Completed with a passing score</strong></p>
+          <div class="certificate-meta">
+            <span id="certificateDate"></span><br />
+            Educational completion only. This is not a medical license, prescription, or proof of treatment eligibility.
+          </div>
+        </div>
+
+        <div class="actions no-print" style="justify-content:center;">
+          <button id="printBtn" class="btn btn-primary">Download or print PDF</button>
+          <button id="restartBtn" class="btn btn-secondary">Return to start</button>
+        </div>
+      </div>
+    </section>
+
+    <p class="footer no-print">
+      General education only. Contact your prescribing clinic with questions about your dose, missed doses, side effects, pregnancy, other medicines, or an upcoming procedure.
+    </p>
+  </main>
+
+  <script>
+    const quizData = [
+      {
+        q: "Who should decide when your dose goes up?",
+        options: ["I should raise it when I feel hungry", "My prescribing care team", "A friend taking the same medicine"],
+        answer: 1,
+        explain: "Follow the dose plan from your prescribing care team. Raising the dose too quickly can make side effects worse."
+      },
+      {
+        q: "What should you do if side effects are hard to manage after a dose increase?",
+        options: ["Take an extra dose to get used to it", "Contact your care team before the next increase", "Stop all food and fluids"],
+        answer: 1,
+        explain: "Your care team may slow, pause, or change the dose plan. Do not change the dose on your own."
+      },
+      {
+        q: "What is a good way to lower nausea?",
+        options: ["Eat large meals quickly", "Eat smaller meals and eat slowly", "Choose fried foods"],
+        answer: 1,
+        explain: "Smaller meals, slower eating, and stopping when comfortably full may help lower nausea."
+      },
+      {
+        q: "Which foods may make nausea or stomach upset worse?",
+        options: ["Fried, greasy, or very rich foods", "Plain toast", "A small serving of fruit"],
+        answer: 0,
+        explain: "High-fat, fried, spicy, or very sugary foods may worsen stomach symptoms for some people."
+      },
+      {
+        q: "Why is drinking enough fluid important?",
+        options: ["It prevents all side effects", "Vomiting or diarrhea can cause dehydration", "It makes the medicine work twice as fast"],
+        answer: 1,
+        explain: "Vomiting, diarrhea, and low intake can cause dehydration. Ask your care team how much fluid is right for you, especially if you have heart or kidney disease."
+      },
+      {
+        q: "Which symptom needs urgent medical advice?",
+        options: ["Mild fullness after a meal", "Severe or lasting belly pain, especially with vomiting", "Feeling less interested in dessert"],
+        answer: 1,
+        explain: "Severe or lasting abdominal pain can be a warning sign. Contact your care team urgently or seek emergency help when symptoms are severe."
+      },
+      {
+        q: "When is low blood sugar more likely?",
+        options: ["When this medicine is used with insulin or a sulfonylurea", "When it is used with water", "Only on the first day"],
+        answer: 0,
+        explain: "Low blood sugar is more likely when GLP-1 medicines are combined with insulin or medicines such as glipizide or glimepiride."
+      },
+      {
+        q: "What should you do if you also take insulin or a medicine such as glipizide?",
+        options: ["Stop it without telling anyone", "Ask your care team whether doses or glucose checks need to change", "Double both medicines"],
+        answer: 1,
+        explain: "Your care team may adjust other diabetes medicines and may ask you to check glucose more often."
+      },
+      {
+        q: "Why is protein important during weight loss?",
+        options: ["It can help support muscle", "It removes the need for exercise", "It prevents every vitamin deficiency"],
+        answer: 0,
+        explain: "Protein supports muscle, but protein alone is not enough. Strength activity is also important when it is safe for you."
+      },
+      {
+        q: "Which activity best helps protect muscle?",
+        options: ["Strength or resistance exercise", "Only stretching one finger", "Avoiding all movement"],
+        answer: 0,
+        explain: "Strength exercises can help protect muscle during weight loss. Choose activities approved for your health and ability."
+      },
+      {
+        q: "Which is a balanced food choice?",
+        options: ["Vegetables, whole grains, protein foods, and healthy fats", "Only candy because portions are small", "Only protein shakes for every meal"],
+        answer: 0,
+        explain: "A varied eating pattern provides protein, fiber, vitamins, minerals, and healthy fats."
+      },
+      {
+        q: "What should you do if your appetite is so low that you cannot eat or drink enough?",
+        options: ["Ignore it for several weeks", "Contact your care team", "Take an extra injection"],
+        answer: 1,
+        explain: "Very low intake can lead to dehydration, weakness, and poor nutrition. Your dose or meal plan may need review."
+      },
+      {
+        q: "Can you use this medicine during pregnancy?",
+        options: ["Yes, without telling the prescriber", "No. Contact your care team if pregnant or planning pregnancy", "Only on weekends"],
+        answer: 1,
+        explain: "Weight-loss GLP-1 medicines should not be used during pregnancy. Pregnancy planning and timing of stopping medicine differ by product, so talk with your care team."
+      },
+      {
+        q: "Who should know you take this medicine before surgery, anesthesia, or an endoscopy?",
+        options: ["Only your pharmacist", "The surgeon, anesthesia team, and procedure team", "No one"],
+        answer: 1,
+        explain: "These medicines can slow stomach emptying. Tell the procedure team early so they can give you the safest instructions."
+      },
+      {
+        q: "Should every patient stop the medicine for the same number of days before a procedure?",
+        options: ["Yes, everyone follows one rule", "No. The procedure team should give a personal plan", "The patient should guess"],
+        answer: 1,
+        explain: "Current guidance uses a personal risk-based plan. Do not stop or continue it before a procedure without instructions from the care team."
+      },
+      {
+        q: "What should you do after missing several weekly doses?",
+        options: ["Restart at the highest dose", "Contact the prescribing clinic before restarting", "Take all missed doses at once"],
+        answer: 1,
+        explain: "After several missed doses, restarting at the same dose may cause strong side effects. Your clinic may recommend a lower restart dose."
+      },
+      {
+        q: "Can you take two GLP-1 or GIP/GLP-1 medicines at the same time?",
+        options: ["Only if both are popular", "Not unless a qualified prescriber specifically directs it", "Yes, to lose weight faster"],
+        answer: 1,
+        explain: "Do not combine these medicines or use another product containing the same active ingredient unless your prescriber directs you."
+      },
+      {
+        q: "What health history must you tell your prescriber about?",
+        options: ["A personal or family history of medullary thyroid cancer or MEN2", "Your favorite color", "Whether you own a scale"],
+        answer: 0,
+        explain: "These medicines have important thyroid tumor warnings and are not used in people with certain personal or family histories."
+      },
+      {
+        q: "What should a person with diabetes and eye disease do?",
+        options: ["Skip eye care", "Tell the prescriber and keep recommended eye follow-up", "Stop checking glucose"],
+        answer: 1,
+        explain: "Fast improvement in glucose can sometimes worsen existing diabetic eye disease for a time. Keep eye appointments and report vision changes."
+      },
+      {
+        q: "What often happens after a GLP-1 weight-management medicine is stopped?",
+        options: ["Appetite and weight may return", "The medicine keeps working forever", "Everyone keeps all weight off without support"],
+        answer: 0,
+        explain: "These medicines are often long-term treatments. Appetite and weight may return after stopping, so make any change with a long-term plan from your care team."
+      }
+    ];
+
+    const state = {
+      index: 0,
+      selected: null,
+      checked: false,
+      answers: Array(quizData.length).fill(null),
+      correct: Array(quizData.length).fill(false)
+    };
+
+    const introSection = document.getElementById("introSection");
+    const quizSection = document.getElementById("quizSection");
+    const resultSection = document.getElementById("resultSection");
+    const certificateSection = document.getElementById("certificateSection");
+    const questionText = document.getElementById("questionText");
+    const questionNumber = document.getElementById("questionNumber");
+    const optionsEl = document.getElementById("options");
+    const feedback = document.getElementById("feedback");
+    const nextBtn = document.getElementById("nextBtn");
+    const backBtn = document.getElementById("backBtn");
+    const progressFill = document.getElementById("progressFill");
+    const progressText = document.getElementById("progressText");
+    const scoreText = document.getElementById("scoreText");
+
+    function showOnly(section) {
+      [introSection, quizSection, resultSection, certificateSection].forEach(el => el.classList.add("hidden"));
+      section.classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function scoreCount() {
+      return state.correct.filter(Boolean).length;
+    }
+
+    function renderQuestion() {
+      const item = quizData[state.index];
+      state.selected = state.answers[state.index];
+      state.checked = state.answers[state.index] !== null;
+
+      questionNumber.textContent = `Question ${state.index + 1}`;
+      questionText.textContent = item.q;
+      progressText.textContent = `Question ${state.index + 1} of ${quizData.length}`;
+      scoreText.textContent = `Score: ${scoreCount()}`;
+      progressFill.style.width = `${((state.index + 1) / quizData.length) * 100}%`;
+      backBtn.disabled = state.index === 0;
+
+      optionsEl.innerHTML = "";
+      item.options.forEach((choice, choiceIndex) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "option";
+        btn.textContent = choice;
+        btn.setAttribute("aria-pressed", state.selected === choiceIndex ? "true" : "false");
+
+        if (state.selected === choiceIndex) btn.classList.add("selected");
+        if (state.checked) btn.disabled = true;
+
+        btn.addEventListener("click", () => {
+          if (state.checked) return;
+          state.selected = choiceIndex;
+          document.querySelectorAll(".option").forEach((option, i) => {
+            const selected = i === choiceIndex;
+            option.classList.toggle("selected", selected);
+            option.setAttribute("aria-pressed", selected ? "true" : "false");
+          });
+          nextBtn.disabled = false;
+        });
+        optionsEl.appendChild(btn);
+      });
+
+      if (state.checked) {
+        const wasCorrect = state.correct[state.index];
+        feedback.className = `feedback${wasCorrect ? "" : " incorrect"}`;
+        feedback.innerHTML = `<strong>${wasCorrect ? "Correct" : "Not quite"}</strong>${item.explain}`;
+        nextBtn.textContent = state.index === quizData.length - 1 ? "See my results" : "Next question";
+        nextBtn.disabled = false;
+      } else {
+        feedback.className = "feedback hidden";
+        feedback.textContent = "";
+        nextBtn.textContent = "Check answer";
+        nextBtn.disabled = state.selected === null;
+      }
+    }
+
+    function checkOrContinue() {
+      if (!state.checked) {
+        if (state.selected === null) return;
+        const item = quizData[state.index];
+        state.answers[state.index] = state.selected;
+        state.correct[state.index] = state.selected === item.answer;
+        state.checked = true;
+        renderQuestion();
+        return;
+      }
+
+      if (state.index < quizData.length - 1) {
+        state.index += 1;
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function showResults() {
+      const correct = scoreCount();
+      const percent = Math.round((correct / quizData.length) * 100);
+      const passed = percent >= 80;
+
+      document.getElementById("resultScore").textContent = `${percent}%`;
+      document.getElementById("resultTitle").textContent = passed ? "You passed" : "A little more review will help";
+      document.getElementById("resultMessage").textContent = passed
+        ? `You answered ${correct} of ${quizData.length} questions correctly. You may now create your completion certificate.`
+        : `You answered ${correct} of ${quizData.length} questions correctly. A score of 80% is needed for the certificate. Review the explanations and try again.`;
+
+      document.getElementById("nameArea").classList.toggle("hidden", !passed);
+      document.getElementById("certificateBtn").classList.toggle("hidden", !passed);
+      showOnly(resultSection);
+    }
+
+    function resetQuiz() {
+      state.index = 0;
+      state.selected = null;
+      state.checked = false;
+      state.answers.fill(null);
+      state.correct.fill(false);
+      document.getElementById("patientName").value = "";
+      showOnly(quizSection);
+      renderQuestion();
+    }
+
+    document.getElementById("startBtn").addEventListener("click", resetQuiz);
+    document.getElementById("retryBtn").addEventListener("click", resetQuiz);
+    document.getElementById("restartBtn").addEventListener("click", () => showOnly(introSection));
+    nextBtn.addEventListener("click", checkOrContinue);
+
+    backBtn.addEventListener("click", () => {
+      if (state.index > 0) {
+        state.index -= 1;
+        renderQuestion();
+      }
+    });
+
+    document.getElementById("certificateBtn").addEventListener("click", () => {
+      const nameInput = document.getElementById("patientName");
+      const name = nameInput.value.trim();
+
+      if (name.length < 2) {
+        nameInput.setCustomValidity("Please enter your name.");
+        nameInput.reportValidity();
+        return;
+      }
+
+      nameInput.setCustomValidity("");
+      document.getElementById("certificateName").textContent = name;
+      document.getElementById("certificateDate").textContent =
+        new Intl.DateTimeFormat("en-US", { dateStyle: "long" }).format(new Date());
+      showOnly(certificateSection);
+    });
+
+    document.getElementById("patientName").addEventListener("input", event => {
+      event.target.setCustomValidity("");
+    });
+
+    document.getElementById("printBtn").addEventListener("click", () => {
+      window.print();
+    });
+  </script>
+</body>
+</html>
